@@ -1,0 +1,93 @@
+1546. Maximum Number of Non-Overlapping Subarrays With Sum Equals Target
+Medium
+
+Given an array nums and an integer target.
+
+Return the maximum number of non-empty non-overlapping subarrays such that the sum of values in each subarray is equal to target.
+
+ 
+
+Example 1:
+
+Input: nums = [1,1,1,1,1], target = 2
+Output: 2
+Explanation: There are 2 non-overlapping subarrays [1,1,1,1,1] with sum equals to target(2).
+
+Example 2:
+
+Input: nums = [-1,3,5,1,4,2,-9], target = 6
+Output: 2
+Explanation: There are 3 subarrays with sum equal to 6.
+([5,1], [4,2], [3,5,1,4,2,-9]) but only the first 2 are non-overlapping.
+
+Example 3:
+
+Input: nums = [-2,6,6,3,5,4,1,2,8], target = 10
+Output: 3
+
+Example 4:
+
+Input: nums = [0,0,0], target = 0
+Output: 3
+
+ 
+
+Constraints:
+
+    1 <= nums.length <= 10^5
+    -10^4 <= nums[i] <= 10^4
+    0 <= target <= 10^6
+
+
+Hints--------------------------------------------------------------------
+
+1.Keep track of prefix sums to quickly look up what subarray that sums "target" can be formed at each step of scanning the input array.
+2.It can be proved that greedily forming valid subarrays as soon as one is found is optimal.
+
+
+
+Solution-------------------------------------------------------------------
+Steps -
+We follow greedy approach here.
+
+1.If we find a subarray with target sum, ending at index i, we count that subarray greedily.     And we update last index to i.
+2.Next time, we make sure that we count subarray only when it starts after last index.
+
+--->>>>Approach
+1.We store all the sums seen so far in hashmap with key = sum, value = end index of subarray with that sum.
+    Example -
+    [1,1,1,1,1], target sum = 2
+    1.index = 0, hashmap[1 -> 0] sum 1 at index 0
+    2.index = 1, hashmap [1 -> 0, 2 -> 1] sum 2 at index 1
+       We find that there is subarray with sum 2 ending at index 1.
+       Hence we increment count and setlastIndex = 1
+    3.index = 2, hashmap [1 -> 0, 2 -> 1, 3 -> 2] sum 3 at index 2
+    We again find there is subarray with sum 3.
+    But the start index is 0 {from hashmap}. So we cannot consider  this     sum, since our lastIndex is already 1.
+Which means that we have already counted subarray ending at index 1 and cannot again count subarray starting at index 0.
+
+
+Also, another trick is that , we always consider smallest subarray with a particular sum.map.put(sum, i) This will override the a particular sum, if it already exists in map, so that we always consider the smallest subarray
+
+
+class Solution {
+    public int maxNonOverlapping(int[] nums, int target) {
+        int sum = 0;
+        int count = 0;
+        HashMap<Integer, Integer> map = new HashMap<>();
+        map.put(0,-1);
+        int lastIndex =-1;
+		for (int i = 0; i<nums.length; i++) {
+		// calculate cumulative sum
+			sum += nums[i];
+			// check if there is subarray ending at index i & it starts after lastIndex
+			if (map.containsKey(sum - target) && map.get(sum-target)>=lastIndex){
+				count++;
+                lastIndex = i;
+            }
+			map.put(sum, i);
+		}
+		return count;
+
+    }
+}
